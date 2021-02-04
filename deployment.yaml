@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plone
+  template:
+    metadata:
+      labels:
+        app: plone
+    spec:
+      containers:
+      - name: main
+        image: arm64v8/plone:5.2.1
+        ports:
+        - containerPort: 8080
+      nodeSelector:
+        architecture: arm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plone
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: plone
