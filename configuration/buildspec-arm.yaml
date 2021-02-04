@@ -3,7 +3,7 @@ env:
     variables:
         IMAGE_REPO_NAME: "multi-arch-test"
         AWS_ACCOUNT_ID: "936068047509"
-        IMAGE_TAG: "latest"
+        IMAGE_TAG: "latest-arm64v8"
 phases:
     install:
         commands:

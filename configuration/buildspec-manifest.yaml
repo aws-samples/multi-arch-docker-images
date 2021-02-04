@@ -1,7 +1,11 @@
 version: 0.2
 # Based on the Docker documentation, must include the DOCKER_CLI_EXPERIMENTAL environment variable
 # https://docs.docker.com/engine/reference/commandline/manifest/    
-
+env:
+  variables:
+    IMAGE_REPO_NAME: "multi-arch-test"
+    AWS_ACCOUNT_ID: "936068047509"
+    IMAGE_TAG: "latest"
 phases:
     install:
         commands:
