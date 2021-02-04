@@ -1,32 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: plone
+  name: node-app
 spec:
-  replicas: 1
+  replicas: 6
   selector:
     matchLabels:
-      app: plone
+      app: node-app
   template:
     metadata:
       labels:
-        app: plone
+        app: node-app
     spec:
       containers:
       - name: main
-        image: arm64v8/plone:5.2.1
+        image: 936068047509.dkr.ecr.us-west-2.amazonaws.com/multi-arch-test:latest
         ports:
-        - containerPort: 8080
-      nodeSelector:
-        architecture: arm
+        - containerPort: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: plone
+  name: node-app-service
+  # annotations:
+  #   service.beta.kubernetes.io/aws-load-balancer-internal: false
+  labels:
+    app: node-app
 spec:
+  type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 8080
+  # Inside the cluster, what port does the service expose?
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
   selector:
-    app: plone
+      app: node-app
