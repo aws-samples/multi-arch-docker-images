@@ -4,7 +4,7 @@ version: 0.2
 env:
   variables:
     IMAGE_REPO_NAME: "multi-arch-repo"
-    AWS_ACCOUNT_ID: "936068047509"
+    AWS_ACCOUNT_ID: "<AWS_ACCOUNT_ID>"
     IMAGE_TAG: "latest"
 phases:
     install:

@@ -9,29 +9,29 @@ vpc: # Existing Amazon VPC
   clusterEndpoints:
     publicAccess:  true
     privateAccess: true
-  id: "vpc-048872e6c50cc5472"
-  cidr: "192.168.0.0/16"
+  id: "<VPC_ID>"
+  cidr: "<VPC_CIRD>"
   subnets: # Definir todas as Subnets para que seus Masters possam estar alocados.
     private: # TODO: suporte para mais regiões
       us-west-2a:
-          id: "subnet-0a92b2bd4f5dda8c3"
-          cidr: "192.168.96.0/19"
+          id: "<PRIVATE_SUBNET_1>"
+          cidr: "<PRIVATE_SUBNET_CIDR>"
 
       us-west-2b:
-          id: "subnet-0f9f6f47f5967ca95"
-          cidr: "192.168.128.0/19"
+          id: "<PRIVATE_SUBNET_2>"
+          cidr: "<PRIVATE_SUBNET_2_CIDR>"
                 
     public:
       us-west-2a:
-          id: "subnet-011d1a2e84c41cb1e"
-          cidr: "192.168.0.0/19"
+          id: "<PUBLIC_SUBNET_1>"
+          cidr: "<PUBLIC_SUBNET_1_CIDR>"
 
       us-west-2b:
-          id: "subnet-0d4f97245946e760d"
-          cidr: "192.168.32.0/19"
+          id: "<PUBLIC_SUBNET_2>"
+          cidr: "<PUBLIC_SUBNET_2_CIDR>"
 
 iam:
-  serviceRoleARN: "arn:aws:iam::936068047509:role/eksClusterRoleNew"
+  serviceRoleARN: "<EKS_ROLE>"
 
 # Example with managed node group for Amazon EKS
 managedNodeGroups:
