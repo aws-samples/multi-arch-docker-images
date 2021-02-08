@@ -56,5 +56,11 @@ First of all you will need to **fork this repository to your GitHub Account** so
 <img src="images/connections.png">
 </p>
 
-Execute 
+Create CodeBuild projects and CodePipeline pipeline using Cloudformation, execute:
+
+```shell
+aws cloudformation create-stack --stack-name multi-architecture-stack --template-body file://cloudformation/cloudformation.yaml --parameters ParameterKey=GitHubCloneUrl,ParameterValue=<YOU_FORKED_GIT_URL> ParameterKey=RepositoryBranch,ParameterValue=<DEFAULT_BRANCH> ParameterKey=RepositoryName,ParameterValue=multi-arch-docker-images ParameterKey=ConnectionArn,ParameterValue=<YOUR_CONNECTION_ARN> --capabilities CAPABILITY_IAM
+```
+
+## Provision Node Application inside our EKS Cluster
 
