@@ -2,6 +2,10 @@
 
 The purpose of this demonstration is to show how to create a pipeline using Code Pipeline that builds multi architecture Docker images and deploy this image inside a Kubernetes cluster.
 
+Using a combination of architecture-specific tags and an associated Docker manifest, we can achieve one-size-fits-all architecture agnostic image pulls from our repo. Let's introduce the concept of manifests first, then we will cover how to do it.
+
+A **Docker manifest** contains information about an image, such as layers, size, and digest. The docker manifest command also gives users additional information such as the os and architecture an image was built for.
+
 ## Prerequisites
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
