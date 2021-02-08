@@ -5,15 +5,12 @@ Parameters:
   GitHubCloneUrl:
     Description: GitHub Repository URL
     Type: String
-    Default: https://github.com/LCCCentralSA/multi-arch-docker-images
   RepositoryBranch:
     Description: Repository Branch to reference
     Type: String
-    Default: master
   RepositoryName:
     Description: Repository name
     Type: String
-    Default: LCCCentralSA/multi-arch-docker-images
   ConnectionArn:
     Description: The arn of the conection to GitHub
     Type: String
