@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: node-app
 spec:
-  replicas: 6
+  replicas: 4
   selector:
     matchLabels:
       app: node-app
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: main
-        image: 936068047509.dkr.ecr.us-west-2.amazonaws.com/multi-arch-test:latest
+        image: __IMAGE_URI__
         ports:
         - containerPort: 3000
 ---
