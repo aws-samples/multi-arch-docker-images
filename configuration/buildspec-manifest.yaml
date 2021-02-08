@@ -3,7 +3,7 @@ version: 0.2
 # https://docs.docker.com/engine/reference/commandline/manifest/    
 env:
   variables:
-    IMAGE_REPO_NAME: "multi-arch-test"
+    IMAGE_REPO_NAME: "multi-arch-repo"
     AWS_ACCOUNT_ID: "936068047509"
     IMAGE_TAG: "latest"
 phases:

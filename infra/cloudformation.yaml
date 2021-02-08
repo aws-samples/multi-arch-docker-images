@@ -17,9 +17,15 @@ Parameters:
   ConnectionArn:
     Description: The arn of the conection to GitHub
     Type: String
-    Default: ""
+    Default: arn:aws:codestar-connections:us-west-2:936068047509:connection/c78f8170-2943-456a-98d8-b2d3b5eac7e8
 
 Resources:
+# Provisionar repositorio do ECR para fazer o push das imagens
+  EcrRepository: 
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: multi-arch-repo
+
   # Code Build steps
   CodeBuildRole:
       Type: AWS::IAM::Role
@@ -177,9 +183,4 @@ Resources:
               Configuration:
                 ProjectName: !Ref DockerManifest
               RunOrder: 1
-
-
-
-
-# Provisionar repositorio do ECR para fazer o push das imagens
 
