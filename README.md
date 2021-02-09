@@ -1,6 +1,6 @@
 # multi-arch-docker-image-demo
 
-The purpose of this demonstration is to show how to create a pipeline using Code Pipeline that builds multi architecture Docker images and deploy this image inside a Kubernetes cluster.
+The purpose of this demonstration is to show how to create a pipeline using Code Pipeline that builds multi architecture Docker images (x64 and arm64) and deploy this image inside a Kubernetes cluster.
 
 Using a combination of architecture-specific tags and an associated Docker manifest, we can achieve one-size-fits-all architecture agnostic image pulls from our repo. Let's introduce the concept of manifests first, then we will cover how to do it.
 
@@ -13,6 +13,8 @@ A **Docker manifest** contains information about an image, such as layers, size,
 - [aws-cli](https://docs.aws.amazon.com/pt_br/cli/latest/userguide/cli-chap-install.html)
 
 ## Deploy EKS Cluster
+
+> :warning: Fork this repository to your GitHub account in order to work the GitHub connection, all the steps of this demonstration you have to do in your repository.
 
 We are going to use eksctl to deploy our EKS cluster inside our AWS account.
 
@@ -56,11 +58,53 @@ First of all you will need to **fork this repository to your GitHub Account** so
 <img src="images/connections.png">
 </p>
 
+Now in your forked repository from this one you have to change some variables inside Codebuild spec files.
+
+Go to **configuration/** and change the following.
+
+```yaml
+version: 0.2
+env:
+    variables:
+        IMAGE_REPO_NAME: "multi-arch-repo"
+        AWS_ACCOUNT_ID: "<AWS_ACCOUNT_ID>"
+        IMAGE_TAG: "latest-amd64"
+```
+
+**Replace AWS_ACCOUNT_ID to your aws account ID, do the same in all the 3 files.**
+
+> :warning: Do not forget to push the changes, Codebuild will get the spec files from the repository.
+
 Create CodeBuild projects and CodePipeline pipeline using Cloudformation, execute:
 
 ```shell
-aws cloudformation create-stack --stack-name multi-architecture-stack --template-body file://cloudformation/cloudformation.yaml --parameters ParameterKey=GitHubCloneUrl,ParameterValue=<YOU_FORKED_GIT_URL> ParameterKey=RepositoryBranch,ParameterValue=<DEFAULT_BRANCH> ParameterKey=RepositoryName,ParameterValue=multi-arch-docker-images ParameterKey=ConnectionArn,ParameterValue=<YOUR_CONNECTION_ARN> --capabilities CAPABILITY_IAM
+aws cloudformation create-stack --stack-name multi-architecture-stack --template-body file://cloudformation/cloudformation.yaml --parameters ParameterKey=GitHubCloneUrl,ParameterValue=<YOU_FORKED_GIT_URL> ParameterKey=RepositoryBranch,ParameterValue=<DEFAULT_BRANCH> ParameterKey=RepositoryName,ParameterValue=<__YOUR_USER__>/multi-arch-docker-images ParameterKey=ConnectionArn,ParameterValue=<YOUR_CONNECTION_ARN> --capabilities CAPABILITY_NAMED_IAM
 ```
 
+Access the CodePipeline console and check if your pipeline ran successfully.
+
+<p align="center"> 
+<img src="images/code_pipeline.png">
+</p>
+
 ## Provision Node Application inside our EKS Cluster
+
+We provisioned 2 Managed Nodegroups, one using x86 architecture and the other one using arm, since we built our application image in two different containers and join then with Docker Manifest, we are able to use one Image URI to provision in our EKS cluster.
+
+The EKS is able to identify the architecture of our image and deploy it on the correct Node.
+
+Go to the AWS Console and ger the multi architecture Image URI.
+
+
+
+Open **eks-configs/deployment.yaml** and change the image URI.
+
+```yaml
+spec:
+      containers:
+      - name: main
+        image: __IMAGE_URI__
+        ports:
+        - containerPort: 3000
+```
 
