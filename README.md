@@ -84,7 +84,7 @@ aws cloudformation create-stack --stack-name multi-architecture-stack --template
 Access the CodePipeline console and check if your pipeline ran successfully.
 
 <p align="center"> 
-<img src="images/code_pipeline.png">
+<img src="images/codepipeline.png">
 </p>
 
 ## Provision Node Application inside our EKS Cluster
@@ -93,9 +93,17 @@ We provisioned 2 Managed Nodegroups, one using x86 architecture and the other on
 
 The EKS is able to identify the architecture of our image and deploy it on the correct Node.
 
-Go to the AWS Console and ger the multi architecture Image URI.
+Go to the AWS Console and get the multi architecture Image URI.
 
+<p align="center"> 
+<img src="images/ecr-repository.png">
+</p>
 
+- **latest-arm64v8:** Is the image the we built using arm64 architecture.
+
+- **latest-amd64:** Is the image the we built using x86 architecture.
+
+- **latest:** It's our Docker Manifest image.
 
 Open **eks-configs/deployment.yaml** and change the image URI.
 
@@ -108,3 +116,47 @@ spec:
         - containerPort: 3000
 ```
 
+> Remember that you have to use the image with the lastet tag
+
+```yaml
+spec:
+      containers:
+      - name: main
+        image: xxxxxxxx.dkr.ecr.us-west-2.amazonaws.com/multi-arch-repo:latest
+        ports:
+        - containerPort: 3000
+```
+
+After that just apply our manifest executing:
+
+```shell
+kubectl apply -f eks-configs/deployment.yaml
+```
+
+It will provision a Service of type LoadBalancer and 4 Pods.
+
+Let's get our service URL:
+
+```shell
+kubectl get svc/node-app-service -ndefault
+```
+
+<p align="center"> 
+<img src="images/kubeservice.png">
+</p>
+
+Copy the EXTERNAL-IP and paste it into your browser, will look like this:
+
+Since we are using Loadbalancer it is doing Round-robin to our Pods inside our Kubernetes cluster, this application shows to you if the pod that you reached is running on x86 architecture or arm.
+
+POD running inside arm node.
+
+<p align="center"> 
+<img src="images/armbrowser.png">
+</p>
+
+POD running inside x86 node.
+
+<p align="center"> 
+<img src="images/x86browser.png">
+</p>
