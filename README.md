@@ -160,3 +160,12 @@ POD running inside x86 node.
 <p align="center"> 
 <img src="images/x86browser.png">
 </p>
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
