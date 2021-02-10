@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Stack to provision complete rekognition
+
+Parameters:
+  GitHubCloneUrl:
+    Description: GitHub Repository URL
+    Type: String
+  RepositoryBranch:
+    Description: Repository Branch to reference
+    Type: String
+  RepositoryName:
+    Description: Repository name
+    Type: String
+  ConnectionArn:
+    Description: The arn of the conection to GitHub
+    Type: String
+
+Resources:
+# Provisionar repositorio do ECR para fazer o push das imagens
+  EcrRepository: 
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: multi-arch-repo
+
+  # Code Build steps
+  CodeBuildRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: CodeBuildRole-multiarch
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+        ManagedPolicyArns: # Change admin access polidy
+          - arn:aws:iam::aws:policy/AdministratorAccess
+
+  AmdBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: AmdBuildProject
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: False
+      Description: AMD CodeBuild Project
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        PrivilegedMode: True
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref CodeBuildRole
+      # Alterar para o source do S3
+      Source:
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+        BuildSpec: configuration/buildspec-amd.yaml
+  
+  ArmBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: ArmBuildProject
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: False
+      Description: AMD CodeBuild Project
+      Environment:
+        ComputeType: BUILD_GENERAL1_LARGE
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        PrivilegedMode: True
+        Type: ARM_CONTAINER
+      ServiceRole: !Ref CodeBuildRole
+      # Alterar para o source do S3
+      Source:
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+        BuildSpec: configuration/buildspec-arm.yaml
+  
+  DockerManifest:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: DockerManifest
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: False
+      Description: AMD CodeBuild Project
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        PrivilegedMode: True
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref CodeBuildRole
+      # Alterar para o source do S3
+      Source:
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+        BuildSpec: configuration/buildspec-manifest.yaml
+  
+  # Code Pipeline Creation
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: BucketOwnerFullControl
+
+  CodePipelineStack:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Location: !Ref ArtifactStoreBucket
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: "1"
+                Provider: CodeStarSourceConnection
+              OutputArtifacts:
+                - Name: MyApp
+              Configuration:
+                ConnectionArn: !Ref ConnectionArn
+                BranchName: !Ref RepositoryBranch
+                FullRepositoryId: !Ref RepositoryName
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: MyApp
+              Configuration:
+                ProjectName: !Ref AmdBuildProject
+              RunOrder: 1
+            - Name: BuildArm
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: MyApp
+              Configuration:
+                ProjectName: !Ref ArmBuildProject
+              RunOrder: 1
+        - Name: BuildManifest
+          Actions:
+            - Name: BuildManifest
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: MyApp
+              Configuration:
+                ProjectName: !Ref DockerManifest
+              RunOrder: 1
+
